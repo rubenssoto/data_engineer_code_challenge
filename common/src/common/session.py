@@ -22,4 +22,6 @@ def get_spark_session() -> SparkSession:
         .getOrCreate()
     )
 
+    spark.sql("SET spark.databricks.delta.schema.autoMerge.enabled = true")
+
     return spark

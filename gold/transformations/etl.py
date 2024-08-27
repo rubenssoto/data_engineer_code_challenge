@@ -1,6 +1,6 @@
 from common.session import get_spark_session
 from pyspark.sql import SparkSession
-from transformations.metrics import add_part_of_day_column, platform_aggregation, most_viewed_courses
+from transformations.metrics import add_part_of_day_column, platform_aggregation, most_viewed_courses, add_metadata
 from infrastructure.config import Config
 
 
@@ -18,7 +18,7 @@ class EtlUsersPlatforms:
             add_part_of_day_column(
                 column_name="timestamp", new_column_name="part_of_the_day"
             )
-        ).transform(platform_aggregation)
+        ).transform(platform_aggregation).transform(add_metadata)
 
         self.config.file_writer.write(df=df, spark=spark)
 
@@ -35,7 +35,7 @@ class EtlMostViewedCourses:
             add_part_of_day_column(
                 column_name="timestamp", new_column_name="part_of_the_day"
             )
-        ).transform(most_viewed_courses)
+        ).transform(most_viewed_courses).transform(add_metadata)
 
         self.config.file_writer.write(df=df, spark=spark)
 

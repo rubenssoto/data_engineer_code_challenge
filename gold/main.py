@@ -1,8 +1,11 @@
 from transformations.etl import EtlFactory
 from infrastructure.config import ConfigReader
+from infrastructure.log import setup_logger
 import sys
 
 def main(args):
+
+    setup_logger()
 
     config = ConfigReader().read_config(f"jobs/gold/yaml_config/{args}.yaml")
 
