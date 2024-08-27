@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "silver"
+version = "0.1.0"
+description = ""
+authors = ["Rubens Soto"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pyspark = "^3.5.2"
+delta-spark = "^3.2.0"
+pyyaml = "^6.0.2"
+black = "^24.8.0"
+setuptools = "^73.0.1"
+chispa = "^0.10.1"
+freezegun = "^1.5.1"
+common = {path = "../common"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

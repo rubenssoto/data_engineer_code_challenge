@@ -1,0 +1,77 @@
+version: '3'
+
+x-spark-common: &spark-common
+  build:
+    context: .
+    dockerfile: spark_image/Dockerfile
+  env_file:
+    - spark.env
+  volumes:
+    - ./jobs:/opt/bitnami/spark/jobs
+    - ./data:/opt/bitnami/spark/data
+  networks:
+    - spark-network
+
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: airflow_image/Dockerfile
+  env_file:
+    - airflow.env
+  volumes:
+    - ./jobs:/opt/airflow/jobs
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./data:/opt/airflow/data
+  depends_on:
+    - postgres
+  networks:
+    - spark-network
+  restart: always
+
+services:
+  spark-master:
+    <<: *spark-common
+    command: bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "9090:8080"
+      - "7077:7077"
+    volumes:
+      - ./spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf
+
+  spark-worker:
+    <<: *spark-common
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: worker
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 1g
+      SPARK_MASTER_URL: spark://spark-master:7077
+
+  postgres:
+    image: postgres:14.0
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    networks:
+      - spark-network
+
+  webserver:
+    <<: *airflow-common
+    command: webserver
+    user: "${UID:-1000}:0"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - scheduler
+
+  scheduler:
+    <<: *airflow-common
+    command: bash -c "airflow db migrate && airflow users create --username admin --firstname Rubens --lastname Soto --role Admin --email rubenssoto@gmail.com --password admin && airflow scheduler"
+    user: "${UID:-1000}:0"
+
+networks:
+  spark-network:

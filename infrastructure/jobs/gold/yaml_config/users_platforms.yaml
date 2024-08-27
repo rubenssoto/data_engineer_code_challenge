@@ -1,0 +1,12 @@
+source_path: s3a://interview-masterclass/silver/masterclass_data
+file_type: delta
+etl_name: users_platforms
+
+
+write_config:
+  write_path:  s3a://interview-masterclass/gold/
+  writer_type: delta_lake_merge
+  table_name: users_platforms
+  primary_key:
+   - part_of_the_day
+   - platform

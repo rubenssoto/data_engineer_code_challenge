@@ -1,0 +1,29 @@
+source_path: s3a://interview-masterclass/bronze/masterclass_data
+file_type: csv
+
+transformers:
+  - data_type_converter:
+      timestamp: timestamp
+      course_id: int
+      chapter_id: int
+
+  - drop_duplicates:
+      columns:
+      - timestamp
+      - user_id
+      - platform
+      - course_id
+      - chapter_id
+
+  - add_metadata:
+
+write_config:
+  write_path: s3a://interview-masterclass/silver
+  writer_type: delta_lake_merge
+  table_name: masterclass_data
+  primary_key:
+   - timestamp
+   - user_id
+   - platform
+   - course_id
+   - chapter_id
